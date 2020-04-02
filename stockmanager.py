@@ -22,6 +22,8 @@ from PyQt5.QtWidgets import (QWidget, QPushButton, QMainWindow,
 from PyQt5.QtSql import QSqlDatabase
 import sqlite3
 
+from app.ig_api.ig_service import IGService
+
 
 def InitialiseDB():
     try:
@@ -106,8 +108,16 @@ class Login(QtWidgets.QDialog):
         self.textPassword.setPlaceholderText(_translate("Dialog", "password"))
 
     def handleLogin(self):
-        if (self.textUserName.text() == 'Admin' and
-                self.textPassword.text() == '1234'):
+        # username = 'alinazay'
+        # password = 'Koshenka98'
+        api_key = 'ca5adb0cc1a57f8a596e032f8b5b0a8864722b83'
+        acc_type = 'demo'
+        ig_service = IGService(self.textUserName.text(), self.textPassword.text(), api_key, acc_type)
+        res = ig_service.create_session()
+        if res != 401:
+            print("fetch_accounts info ")  # ****fetch_accounts info
+            response = ig_service.fetch_accounts()
+            print(response)
             self.accept()
         else:
             QtWidgets.QMessageBox.warning(
@@ -475,8 +485,8 @@ if __name__ == '__main__':
     import sys
 
     app = QtWidgets.QApplication(sys.argv)
-    # login = Login()
-    #
-    # if login.exec_() == QtWidgets.QDialog.Accepted:
-    window = Example()
-    sys.exit(app.exec_())
+    login = Login()
+
+    if login.exec_() == QtWidgets.QDialog.Accepted:
+        window = Example()
+        sys.exit(app.exec_())
