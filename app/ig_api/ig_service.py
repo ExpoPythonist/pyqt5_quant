@@ -393,8 +393,9 @@ class IGService:
         }
 
         response = requests.post(self.BASE_URL + '/session', data=json.dumps(params), headers=self.BASIC_HEADERS)
-        if response.status_code == 401:
-            return 401
+        print('response.status_code  ',response.status_code)
+        if response.status_code != 200:
+            return response.status_code
         self._set_headers(response.headers, True)
         data = self.parse_response(response.text)
         return (data)

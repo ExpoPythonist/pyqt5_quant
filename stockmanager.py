@@ -77,6 +77,7 @@ class Login(QtWidgets.QDialog):
         self.groupBox = QtWidgets.QGroupBox(self)
         self.groupBox.setGeometry(QtCore.QRect(160, 160, 371, 211))
         self.groupBox.setObjectName("groupBox")
+        self.groupBox.setTitle("Please login with Telegram account")
         self.buttonLogin = QtWidgets.QPushButton(self.groupBox)
         self.buttonLogin.setGeometry(QtCore.QRect(130, 150, 89, 25))
         self.buttonLogin.setObjectName("pushButton")
@@ -114,7 +115,7 @@ class Login(QtWidgets.QDialog):
         acc_type = 'demo'
         ig_service = IGService(self.textUserName.text(), self.textPassword.text(), api_key, acc_type)
         res = ig_service.create_session()
-        if res != 401:
+        if isinstance(res, dict):
             print("fetch_accounts info ")  # ****fetch_accounts info
             response = ig_service.fetch_accounts()
             print(response)
@@ -490,3 +491,6 @@ if __name__ == '__main__':
     if login.exec_() == QtWidgets.QDialog.Accepted:
         window = Example()
         sys.exit(app.exec_())
+
+
+
