@@ -21,19 +21,54 @@ from PyQt5.QtWidgets import (QWidget, QPushButton, QMainWindow,
                              QHBoxLayout, QApplication, QAction, QFileDialog)
 
 import sqlite3
+from PyQt5.QtSql import QSqlDatabase
 
-try:
-    conn = sqlite3.connect('stock.db')
-    c = conn.cursor()
-    c.execute("""CREATE TABLE stock (
-                name text,
-                quantity integer,
-                cost integer
-                ) """)
-    conn.commit()
-except Exception:
-    print('DB exists')
 
+# try:
+#     conn = sqlite3.connect('stock.db')
+#     c = conn.cursor()
+#     c.execute("""DROP TABLE stock""")
+#     c.execute("""CREATE TABLE stock (
+#                 name text,
+#                 quantity integer,
+#                 cost integer
+#                 ) """)
+#     conn.commit()
+# except Exception as ex:
+#     print('DB exists '+ str(ex))
+
+def InitialisePostgresDB():
+    try:
+        db = QSqlDatabase.addDatabase("QPSQL")
+        db.setHostName("127.0.0.1")
+        db.setDatabaseName("quantdb")
+        db.setUserName("postgres")
+        db.setPassword("123456789")
+        ok = db.open()
+        print(ok)
+
+        # c.execute("""DROP TABLE stock""")
+        create_stock_query = """CREATE TABLE stock (
+                    id int NOT NULL,
+                    name text,
+                    quantity integer,
+                    cost integer
+                    )"""
+        db.exec(create_stock_query)
+        # db.commit()
+        return db
+    except Exception as ex:
+        print('DB exists '+ str(ex))
+
+# try:
+#     conn = sqlite3.connect('stock.db')
+#     c = conn.cursor()
+#     c.execute(""" INSERT INTO stock VALUES (1, 'SOAP', 16, 5000) """)
+#     c.execute(""" INSERT INTO stock VALUES (2, 'Savlon', 3, 200) """)
+#     c.execute(""" INSERT INTO stock VALUES (3, 'Detols', 7, 80) """)
+#     conn.commit()
+# except Exception as ex:
+#     print('Insert Failed '+str(ex))
 
 class Login(QtWidgets.QDialog):
     def __init__(self, parent=None):
@@ -102,6 +137,13 @@ class Example(QMainWindow):
         self.initUI()
         self.setGeometry(500, 700, 800, 750)
         self.setWindowTitle('Quant')
+
+        # Connect db start
+        self.db = InitialisePostgresDB()
+        # Connect db end
+
+    def closeEvent(self, event):
+        self.db.close()
 
     def initUI(self):
         self.st = stackedExample()
@@ -344,7 +386,7 @@ class stackedExample(QWidget):
                 self.View.setItem(i, 0, QTableWidgetItem(a[0].replace('_', ' ').upper()))
                 self.View.setItem(i, 1, QTableWidgetItem(str(a[1])))
                 self.View.setItem(i, 2, QTableWidgetItem(str(a[2])))
-                self.View.setRowHeight(i, 50)
+                self.View.setRowHeight(i,  50)
             self.lbl3.setText('Viewing Stock Database.')
         else:
             self.lbl3.setText('No valid information in database.')
