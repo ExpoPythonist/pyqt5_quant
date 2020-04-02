@@ -19,37 +19,20 @@ from PyQt5.QtWidgets import QListWidget
 from PyQt5.QtWidgets import QStackedWidget
 from PyQt5.QtWidgets import (QWidget, QPushButton, QMainWindow,
                              QHBoxLayout, QApplication, QAction, QFileDialog)
-
-import sqlite3
 from PyQt5.QtSql import QSqlDatabase
+import sqlite3
 
 
-# try:
-#     conn = sqlite3.connect('stock.db')
-#     c = conn.cursor()
-#     c.execute("""DROP TABLE stock""")
-#     c.execute("""CREATE TABLE stock (
-#                 name text,
-#                 quantity integer,
-#                 cost integer
-#                 ) """)
-#     conn.commit()
-# except Exception as ex:
-#     print('DB exists '+ str(ex))
-
-def InitialisePostgresDB():
+def InitialiseDB():
     try:
-        db = QSqlDatabase.addDatabase("QPSQL")
-        db.setHostName("127.0.0.1")
-        db.setDatabaseName("quantdb")
-        db.setUserName("postgres")
-        db.setPassword("123456789")
+        db = QSqlDatabase.addDatabase("QSQLITE")
         ok = db.open()
         print(ok)
 
-        # c.execute("""DROP TABLE stock""")
+        # drop_stock_query ="""DROP TABLE stock"""
+        # db.exec(drop_stock_query)
         create_stock_query = """CREATE TABLE stock (
-                    id int NOT NULL,
+                    id int NOT NULL UNIQUE ,
                     name text,
                     quantity integer,
                     cost integer
@@ -58,17 +41,19 @@ def InitialisePostgresDB():
         # db.commit()
         return db
     except Exception as ex:
-        print('DB exists '+ str(ex))
+        print('DB exists ' + str(ex))
 
-# try:
-#     conn = sqlite3.connect('stock.db')
-#     c = conn.cursor()
-#     c.execute(""" INSERT INTO stock VALUES (1, 'SOAP', 16, 5000) """)
-#     c.execute(""" INSERT INTO stock VALUES (2, 'Savlon', 3, 200) """)
-#     c.execute(""" INSERT INTO stock VALUES (3, 'Detols', 7, 80) """)
-#     conn.commit()
-# except Exception as ex:
-#     print('Insert Failed '+str(ex))
+def InitialiseStockData():
+    try:
+        conn = sqlite3.connect('stock.db')
+        c = conn.cursor()
+        c.execute(""" INSERT INTO stock VALUES (1, 'Soap', 16, 5000) """)
+        c.execute(""" INSERT INTO stock VALUES (2, 'Savlon', 3, 200) """)
+        c.execute(""" INSERT INTO stock VALUES (3, 'Detols', 7, 80) """)
+        conn.commit()
+    except Exception as ex:
+        print('Insert Failed ' + str(ex))
+
 
 class Login(QtWidgets.QDialog):
     def __init__(self, parent=None):
@@ -139,10 +124,15 @@ class Example(QMainWindow):
         self.setWindowTitle('Quant')
 
         # Connect db start
-        self.db = InitialisePostgresDB()
+        self.db = InitialiseDB()
         # Connect db end
 
+        # Initialise Stock Model data start
+        InitialiseStockData()
+        # Initialise Stock Model data end
+
     def closeEvent(self, event):
+        print('DB close')
         self.db.close()
 
     def initUI(self):
@@ -386,7 +376,7 @@ class stackedExample(QWidget):
                 self.View.setItem(i, 0, QTableWidgetItem(a[0].replace('_', ' ').upper()))
                 self.View.setItem(i, 1, QTableWidgetItem(str(a[1])))
                 self.View.setItem(i, 2, QTableWidgetItem(str(a[2])))
-                self.View.setRowHeight(i,  50)
+                self.View.setRowHeight(i, 50)
             self.lbl3.setText('Viewing Stock Database.')
         else:
             self.lbl3.setText('No valid information in database.')
@@ -482,7 +472,6 @@ class stackedExample(QWidget):
 
 
 if __name__ == '__main__':
-
     import sys
 
     app = QtWidgets.QApplication(sys.argv)
@@ -491,4 +480,3 @@ if __name__ == '__main__':
     # if login.exec_() == QtWidgets.QDialog.Accepted:
     window = Example()
     sys.exit(app.exec_())
-

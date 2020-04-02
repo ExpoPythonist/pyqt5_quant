@@ -10,10 +10,8 @@ def insert_prod(name, q, cost, date):
         c.execute("SELECT quantity FROM stock WHERE name = :name", {'name': name})
         check = c.fetchone()
 
-    # print(check)
     if check is None:
         with conn:
-            # print('yes')
             c.execute("INSERT INTO stock VALUES (:name, :quantity, :cost)", {'name': name, 'quantity': q, 'cost': cost})
             a = name.upper() + ' ' + str(q) + ' ' + str(cost) + ' ' + str(date) + ' ' + 'INSERT ' + "\n"
             with open("transaction.txt", "a") as myfile:
