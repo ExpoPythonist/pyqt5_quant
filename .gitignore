@@ -144,3 +144,4 @@ media/*
 
 _pycache_
 .env
+*.session

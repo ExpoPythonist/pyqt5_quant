@@ -1,6 +1,9 @@
 from PyQt5 import QtWidgets
 import os
 import datetime
+
+from PyQt5 import QtGui
+
 import manipulation as mp
 import init_db
 from PyQt5.QtCore import QRect
@@ -22,7 +25,7 @@ from PyQt5.QtWidgets import (QWidget, QPushButton, QMainWindow,
 from PyQt5.QtSql import QSqlDatabase
 import sqlite3
 
-from app.ig_api.ig_service import IGService
+from app.ig_api.telegram_service import TelegramService
 
 
 def InitialiseDB():
@@ -74,51 +77,50 @@ class Login(QtWidgets.QDialog):
 
         # Dialog.setObjectName("Dialog")
         # Dialog.resize(692, 483)
-        self.groupBox = QtWidgets.QGroupBox(self)
-        self.groupBox.setGeometry(QtCore.QRect(160, 160, 371, 211))
-        self.groupBox.setObjectName("groupBox")
-        self.groupBox.setTitle("Please login with Telegram account")
-        self.buttonLogin = QtWidgets.QPushButton(self.groupBox)
-        self.buttonLogin.setGeometry(QtCore.QRect(130, 150, 89, 25))
-        self.buttonLogin.setObjectName("pushButton")
-        self.buttonLogin.clicked.connect(self.handleLogin)
-        self.labelUserName = QtWidgets.QLabel(self.groupBox)
-        self.labelUserName.setGeometry(QtCore.QRect(40, 70, 71, 17))
-        self.labelUserName.setObjectName("labelUserName")
-        self.labelPassword = QtWidgets.QLabel(self.groupBox)
-        self.labelPassword.setGeometry(QtCore.QRect(40, 100, 67, 17))
-        self.labelPassword.setObjectName("labelPassword")
-        self.textUserName = QtWidgets.QLineEdit(self.groupBox)
-        self.textUserName.setGeometry(QtCore.QRect(130, 70, 161, 25))
-        self.textUserName.setText("")
-        self.textUserName.setObjectName("textUserName")
-        self.textPassword = QtWidgets.QLineEdit(self.groupBox)
-        self.textPassword.setGeometry(QtCore.QRect(130, 100, 161, 25))
-        self.textPassword.setObjectName("textPassword")
+        self.setObjectName("TelegrameAccountLogin")
+        self.resize(776, 600)
+        font = QtGui.QFont()
+        font.setItalic(False)
+        self.setFont(font)
+        self.groupBoxTelegramSendCode = QtWidgets.QGroupBox(self)
+        self.groupBoxTelegramSendCode.setGeometry(QtCore.QRect(110, 170, 531, 211))
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setWeight(75)
+        self.groupBoxTelegramSendCode.setFont(font)
+        self.groupBoxTelegramSendCode.setObjectName("groupBoxTelegramSendCode")
+        self.sendCodeLabel = QtWidgets.QLabel(self.groupBoxTelegramSendCode)
+        self.sendCodeLabel.setGeometry(QtCore.QRect(140, 90, 121, 17))
+        self.sendCodeLabel.setObjectName("sendCodeLabel")
+        self.sendCodeButton = QtWidgets.QPushButton(self.groupBoxTelegramSendCode)
+        self.sendCodeButton.setGeometry(QtCore.QRect(210, 150, 89, 25))
+        self.sendCodeButton.setObjectName("sendCodeButton")
+        self.sendCodeButton.clicked.connect(self.handleLogin)
+        self.sendCodelineEdit = QtWidgets.QLineEdit(self.groupBoxTelegramSendCode)
+        self.sendCodelineEdit.setEnabled(True)
+        self.sendCodelineEdit.setGeometry(QtCore.QRect(260, 90, 171, 25))
+        font = QtGui.QFont()
+        font.setBold(False)
+        font.setWeight(50)
+        self.sendCodelineEdit.setFont(font)
+        self.sendCodelineEdit.setInputMethodHints(QtCore.Qt.ImhNone)
+        self.sendCodelineEdit.setText("")
+        self.sendCodelineEdit.setObjectName("lineEdit")
 
         self.retranslateUi(self)
         QtCore.QMetaObject.connectSlotsByName(self)
 
-    def retranslateUi(self, Dialog):
+    def retranslateUi(self, TelegrameAccountLogin):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Quant Login"))
-        self.buttonLogin.setText(_translate("Dialog", "Login"))
-        self.labelUserName.setText(_translate("Dialog", "Username"))
-        self.labelPassword.setText(_translate("Dialog", "Password"))
-        self.textUserName.setPlaceholderText(_translate("Dialog", "username"))
-        self.textPassword.setPlaceholderText(_translate("Dialog", "password"))
+        TelegrameAccountLogin.setWindowTitle(_translate("TelegrameAccountLogin", "Telegram Account Login"))
+        self.groupBoxTelegramSendCode.setTitle(_translate("groupBoxTelegramSendCode", "Telegram Account Login"))
+        self.sendCodeLabel.setText(_translate("sendCodeLabel", "Phone Number"))
+        self.sendCodeButton.setText(_translate("sendCodeButton", "Send Code "))
 
     def handleLogin(self):
-        # username = 'alinazay'
-        # password = 'Koshenka98'
-        api_key = 'ca5adb0cc1a57f8a596e032f8b5b0a8864722b83'
-        acc_type = 'demo'
-        ig_service = IGService(self.textUserName.text(), self.textPassword.text(), api_key, acc_type)
-        res = ig_service.create_session()
+        telegram_service = TelegramService()
+        res = telegram_service.send_code(self.sendCodelineEdit.text())
         if isinstance(res, dict):
-            print("fetch_accounts info ")  # ****fetch_accounts info
-            response = ig_service.fetch_accounts()
-            print(response)
             self.accept()
         else:
             QtWidgets.QMessageBox.warning(
