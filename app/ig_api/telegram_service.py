@@ -30,40 +30,25 @@ class TelegramService:
         client = TelegramClient('Telegram Desktop 1.9.21', self.API_KEY, self.API_HASH)
         client.connect()
         try:
-            if not client.is_user_authorized():
-                res = client.send_code_request(phone_number)
-                # me = client.sign_in(phone_number, 92625)
+            # if not client.is_user_authorized():
+            res = client.send_code_request(phone_number)
         except Exception as ex:
             return 400
         return res.__dict__
 
-    def validate_code(self, code):
+    def validate_code(self, phone_number, code, phone_code_hash):
         client = TelegramClient('Telegram Desktop 1.9.21', self.API_KEY, self.API_HASH)
         client.connect()
         try:
             if not client.is_user_authorized():
-                me = client.sign_in(code)
+                me = client.sign_in(phone=phone_number, code=code, password=None, bot_token=None, phone_code_hash=phone_code_hash)
         except Exception as ex:
+            print('exxx ', str(ex))
             return 400
         return me.__dict__
 
     def send_message(self):
-
-        # # ========= TO GET CHANNEL MESSAGES =======
-        client = TelegramClient('Telegram Desktop 1.9.21', self.API_ID, self.API_HASH)
-        client.connect()
-        if not client.is_user_authorized():
-            client.send_code_request(self.PHONE_NUMBER)
-            me = client.sign_in(self.PHONE_NUMBER, input('Enter code: '))
-
-        async def get_channel_messages():
-            async for message in client.iter_messages('https://t.me/signalsTest11'):
-                print(message.id, message.text)
-                time.sleep(2)
-                break
-
-        with client:
-            client.loop.run_until_complete(get_channel_messages())
+        pass
 
     ########## PARSE_RESPONSE ##########
 

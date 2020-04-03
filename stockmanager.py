@@ -60,23 +60,61 @@ def InitialiseStockData():
         print('Insert Failed ' + str(ex))
 
 
+class VarifiedPhoneCode(QtWidgets.QDialog):
+    def __init__(self, parent=None):
+        super(VarifiedPhoneCode, self).__init__(parent)
+        self.setObjectName("VarifiedPhoneCode")
+        self.resize(776, 600)
+        self.VarifiedPhoneCodeGroupBox = QtWidgets.QGroupBox(self)
+        self.VarifiedPhoneCodeGroupBox.setGeometry(QtCore.QRect(150, 170, 451, 231))
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setWeight(75)
+        self.VarifiedPhoneCodeGroupBox.setFont(font)
+        self.VarifiedPhoneCodeGroupBox.setObjectName("VarifiedPhoneCodeGroupBox")
+        self.codeLineEdit = QtWidgets.QLineEdit(self.VarifiedPhoneCodeGroupBox)
+        self.codeLineEdit.setGeometry(QtCore.QRect(120, 100, 241, 25))
+        self.codeLineEdit.setObjectName("codeLineEdit")
+        self.codeLabel = QtWidgets.QLabel(self.VarifiedPhoneCodeGroupBox)
+        self.codeLabel.setGeometry(QtCore.QRect(70, 100, 41, 17))
+        self.codeLabel.setObjectName("codeLabel")
+        self.LoginpushButton = QtWidgets.QPushButton(self.VarifiedPhoneCodeGroupBox)
+        self.LoginpushButton.setGeometry(QtCore.QRect(120, 140, 89, 25))
+        self.LoginpushButton.setObjectName("LoginpushButton")
+        self.LoginpushButton.clicked.connect(self.handleVarifiedCode)
+        self.BackPushButton = QtWidgets.QPushButton(self.VarifiedPhoneCodeGroupBox)
+        self.BackPushButton.setGeometry(QtCore.QRect(220, 140, 141, 25))
+        self.BackPushButton.setObjectName("BackPushButton")
+
+        self.retranslateUi(self)
+        QtCore.QMetaObject.connectSlotsByName(self)
+
+    def set_data(self, phone_number, phone_code_hash):
+        self.phone_number = phone_number
+        self.phone_code_hash = phone_code_hash
+
+
+    def retranslateUi(self, Dialog):
+        _translate = QtCore.QCoreApplication.translate
+        Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
+        self.VarifiedPhoneCodeGroupBox.setTitle(_translate("Dialog", "Enter phone code"))
+        self.codeLabel.setText(_translate("Dialog", "Code"))
+        self.LoginpushButton.setText(_translate("Dialog", "Login now"))
+        self.BackPushButton.setText(_translate("Dialog", "Back to Send Code"))
+
+    def handleVarifiedCode(self):
+        telegram_service = TelegramService()
+        res = telegram_service.validate_code(self.phone_number, self.codeLineEdit.text(), self.phone_code_hash)
+        if isinstance(res, dict):
+            self.accept()
+        else:
+            QtWidgets.QMessageBox.warning(
+                self, 'Error', 'Code is not valid.')
+
+
 class Login(QtWidgets.QDialog):
     def __init__(self, parent=None):
         super(Login, self).__init__(parent)
-        # self.textName = QtWidgets.QLineEdit(self)
-        # self.textPass = QtWidgets.QLineEdit(self)
-        # self.buttonLogin = QtWidgets.QPushButton('Login', self)
-        # self.buttonLogin.clicked.connect(self.handleLogin)
-        # self.setGeometry(300, 300, 1000, 600)
-        # self.setWindowTitle('Quant Login')
-        #
-        # layout = QtWidgets.QVBoxLayout(self)
-        # layout.addWidget(self.textName)
-        # layout.addWidget(self.textPass)
-        # layout.addWidget(self.buttonLogin)
-
-        # Dialog.setObjectName("Dialog")
-        # Dialog.resize(692, 483)
         self.setObjectName("TelegrameAccountLogin")
         self.resize(776, 600)
         font = QtGui.QFont()
@@ -121,10 +159,15 @@ class Login(QtWidgets.QDialog):
         telegram_service = TelegramService()
         res = telegram_service.send_code(self.sendCodelineEdit.text())
         if isinstance(res, dict):
+            self.hide()
+            varifiedphonecode = VarifiedPhoneCode()
+            varifiedphonecode.set_data(self.sendCodelineEdit.text(), res['phone_code_hash'])
+            if varifiedphonecode.exec_() == QtWidgets.QDialog.Accepted:
+                pass
             self.accept()
         else:
             QtWidgets.QMessageBox.warning(
-                self, 'Error', 'Bad user or password')
+                self, 'Error', 'Phone number is not valid.')
 
 
 class Example(QMainWindow):
