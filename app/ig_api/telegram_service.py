@@ -40,11 +40,11 @@ class TelegramService:
         client = TelegramClient('Telegram Desktop 1.9.21', self.API_KEY, self.API_HASH)
         client.connect()
         try:
-            if not client.is_user_authorized():
-                me = client.sign_in(phone=phone_number, code=code, password=None, bot_token=None, phone_code_hash=phone_code_hash)
+            # if not client.is_user_authorized():
+            me = client.sign_in(phone=phone_number, code=code, password=None, bot_token=None, phone_code_hash=phone_code_hash)
         except Exception as ex:
             print('exxx ', str(ex))
-            return 400
+            return str(ex)
         return me.__dict__
 
     def send_message(self):

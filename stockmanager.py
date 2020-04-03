@@ -48,6 +48,7 @@ def InitialiseDB():
     except Exception as ex:
         print('DB exists ' + str(ex))
 
+
 def InitialiseStockData():
     try:
         conn = sqlite3.connect('stock.db')
@@ -93,7 +94,6 @@ class VarifiedPhoneCode(QtWidgets.QDialog):
         self.phone_number = phone_number
         self.phone_code_hash = phone_code_hash
 
-
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
@@ -104,10 +104,11 @@ class VarifiedPhoneCode(QtWidgets.QDialog):
 
     def handleVarifiedCode(self):
         telegram_service = TelegramService()
-        res = telegram_service.validate_code(self.phone_number, self.codeLineEdit.text(), self.phone_code_hash)
-        if isinstance(res, dict):
+        response = telegram_service.validate_code(self.phone_number, self.codeLineEdit.text(), self.phone_code_hash)
+        try:
+            id = response['id']
             self.accept()
-        else:
+        except:
             QtWidgets.QMessageBox.warning(
                 self, 'Error', 'Code is not valid.')
 
@@ -163,8 +164,10 @@ class Login(QtWidgets.QDialog):
             varifiedphonecode = VarifiedPhoneCode()
             varifiedphonecode.set_data(self.sendCodelineEdit.text(), res['phone_code_hash'])
             if varifiedphonecode.exec_() == QtWidgets.QDialog.Accepted:
-                pass
-            self.accept()
+                self.accept()
+            else:
+                QtWidgets.QMessageBox.warning(
+                    self, 'Error', 'Code is not valid.')
         else:
             QtWidgets.QMessageBox.warning(
                 self, 'Error', 'Phone number is not valid.')
@@ -536,6 +539,3 @@ if __name__ == '__main__':
     if login.exec_() == QtWidgets.QDialog.Accepted:
         window = Example()
         sys.exit(app.exec_())
-
-
-
